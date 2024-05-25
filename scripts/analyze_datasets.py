@@ -29,7 +29,7 @@ def analyze_brand_codes():
         else:
             count_records_missing_brand_code += 1
 
-        if top_brand:
+        if top_brand is not None:
             if top_brand == True:
                 number_of_top_brands += 1
         else:
@@ -85,6 +85,52 @@ def analyze_receipts_data():
     )
 
 
+def analyze_users():
+    user_records = get_records("data-sources/users.jsonl")
+    users_per_state = {}
+    users_per_role = {}
+    users_per_signup_source = {}
+    number_of_users_without_signup_source = 0
+    number_users_without_state = 0
+
+    for rec in user_records:
+        role = rec.get("role")
+        source = rec.get("signUpSource")
+        state = rec.get("state")
+
+        if state:
+            if state not in users_per_state:
+                users_per_state[state] = 1
+            else:
+                users_per_state[state] += 1
+        else:
+            number_users_without_state += 1
+
+        if role not in users_per_role:
+            users_per_role[role] = 1
+        else:
+            users_per_role[role] += 1
+
+        if source:
+            if source not in users_per_signup_source:
+                users_per_signup_source[source] = 1
+            else:
+                users_per_signup_source[source] += 1
+        else:
+            number_of_users_without_signup_source += 1
+
+    print(users_per_state)
+    print(users_per_signup_source)
+    print(users_per_role)
+    print(
+        f"Percentage of users without signup source: {number_of_users_without_signup_source/len(user_records) * 100} %"
+    )
+    print(
+        f"Percentage of users without state: {number_users_without_state/len(user_records) * 100} %"
+    )
+
+
 if __name__ == "__main__":
     analyze_brand_codes()
     analyze_receipts_data()
+    analyze_users()
